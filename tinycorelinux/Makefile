@@ -1,30 +1,31 @@
-TCL_BASE_URL:=http://tinycorelinux.net/6.x/x86_64
+TCL_BASE_URL:=http://tinycorelinux.net/5.x/x86
 
-all: rootfs64.tgz
-	[ -d rootfs64 ] && sudo rm -fr rootfs64
+all: rootfs.tgz
+	[ -d rootfs ] && sudo rm -fr rootfs
 	docker build -t tinycorelinux .
 
-rootfs64.tgz: unsquash
-	cd rootfs64 && sudo tar cvf ../$@ .
+rootfs.tgz: unsquash
+	cd rootfs && sudo tar cvf ../$@ .
 
-unsquash: squashfs-tools.tcz
+unsquash: squashfs-tools-4.x.tcz
 	make extract
 	which unsquashfs || brew install squashfs
-	cd rootfs64 && sudo unsquashfs -d . -f ../$<
+	cd rootfs && sudo unsquashfs -d . -f ../$<
 
-squashfs-tools.tcz:
+squashfs-tools-4.x.tcz:
 	wget $(TCL_BASE_URL)/tcz/$@
 
-extract: rootfs64.gz
-	mkdir -p rootfs64
-	cd rootfs64 && \
+extract: rootfs.gz
+	mkdir -p rootfs
+	cd rootfs && \
 	cat ../$< | gunzip -cd | sudo cpio -i -d --insecure 
 
-rootfs64.gz: rootfs64.gz.md5.txt
+rootfs.gz: rootfs.gz.md5.txt
 	wget $(TCL_BASE_URL)/release/distribution_files/$@
 	[ "$$( (md5 $@ || md5sum $@) | sed -e 's/^.*\([0-9a-f]\{32\}).*$$/\1/')" = "$(awk '{print $$1}' $<)" ]
 
-rootfs64.gz.md5.txt:
+rootfs.gz.md5.txt:
 	wget $(TCL_BASE_URL)/release/distribution_files/$@
 
-
+clean:
+	rm -f rootfs.gz rootfs.gz.md5.txt rootfs.tgz

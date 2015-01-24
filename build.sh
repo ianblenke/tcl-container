@@ -17,12 +17,12 @@ cd /root
 wget ${LIBDNET_URL}
 wget ${OVT_URL}
 
-mkdir /tmp/stage
+mkdir -p /tmp/stage/libdnet
 
 cd /root
 tar zxf ${LIBDNET}.tar.gz 
 cd ${LIBDNET}
-./configure --host=i486-pc-linux-gnu && make && make install && make DESTDIR=/tmp/stage/libdnet install
+./configure --host=i486-pc-linux-gnu --with-file=/usr/local && make && make install && make DESTDIR=/tmp/stage/libdnet install
 
 (cd /tmp/stage/libdnet && tar zcf /tarballs/libdnet.tgz .)
 
@@ -34,10 +34,12 @@ for f in /root/patches/ovt/*.patch ; do
    patch -p0 < $f
 done
 
+mkdir -p /tmp/stage/open-vm-tools
+
 # we need to set --host because boot2docker is 32 bit, and this will not be
 # detected correctly in a container running in a 64bit host
 autoreconf -i && \
-./configure --without-kernel-modules --without-pam --without-x --without-icu --host=i486-pc-linux-gnu && \
+./configure --without-kernel-modules --without-pam --without-x --without-icu --with-file=/usr/local --host=i486-pc-linux-gnu && \
   make LIBS="-ltirpc" CFLAGS='-Wno-deprecated-declarations' && \
   make DESTDIR=/tmp/stage/open-vm-tools install
 
