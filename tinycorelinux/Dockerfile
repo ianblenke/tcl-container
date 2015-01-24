@@ -1,3 +1,3 @@
 FROM scratch
 
-ADD rootfs64.gz /
+ADD rootfs64.tgz /
